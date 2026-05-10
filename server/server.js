@@ -1,6 +1,8 @@
 import express from "express";
 import { geocodeLocation, getCurrentWeather } from "./lib/weather.js";
 import { getClosestWaters } from "./lib/geo.js";
+import { scoreAllSpecies } from "./lib/scoring.js";
+import { WATERS } from "./lib/waters.js";
 
 const app = express();
 const PORT = 3000;
@@ -60,6 +62,46 @@ app.post("/api/nearby-waters", async (req, res) => {
 
     return res.status(500).json({
       error: "Something went wrong while finding nearby waters.",
+      details: error.message,
+    });
+  }
+});
+
+app.get("/api/water/:id", async (req, res) => {
+  try {
+    const water = WATERS.find((waterEntry) => {
+      return waterEntry.id === req.params.id;
+    });
+
+    if (!water) {
+      return res.status(404).json({
+        error: "Water not found.",
+        details: `No water exists with the id "${req.params.id}".`,
+      });
+    }
+
+    const weather = await getCurrentWeather(water.lat, water.lon);
+    const speciesScores = scoreAllSpecies(water, weather);
+
+    return res.json({
+      water: {
+        id: water.id,
+        name: water.name,
+        type: water.type,
+        region: water.region,
+        pressureLevel: water.pressureLevel,
+        accessibility: water.accessibility,
+        lat: water.lat,
+        lon: water.lon,
+      },
+      weather,
+      speciesScores,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      error: "Something went wrong while getting this water.",
       details: error.message,
     });
   }
