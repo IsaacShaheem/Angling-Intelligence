@@ -2,9 +2,43 @@ const GEOCODING_API_URL = "https://geocoding-api.open-meteo.com/v1/search";
 const FORECAST_API_URL = "https://api.open-meteo.com/v1/forecast";
 
 export async function geocodeLocation(location) {
+  const cleanLocation = normalizeLocationText(location);
+  const searchLocation = getOntarioFocusedLocation(cleanLocation);
+  let data = await fetchGeocodingResults(searchLocation);
+
+  if (!data.results || data.results.length === 0) {
+    data = await fetchGeocodingResults(getBaseLocation(cleanLocation), 100);
+  }
+
+  if (!data.results || data.results.length === 0) {
+    throw new Error(`No location found for "${location}".`);
+  }
+
+  const result = getBestOntarioResult(data.results);
+
+  return {
+    name: result.name,
+    country: result.country,
+    region: result.admin1 || null,
+    lat: result.latitude,
+    lon: result.longitude,
+  };
+}
+
+function getOntarioFocusedLocation(location) {
+  const alreadyOntarioFocused = /\b(ontario|canada)\b/i.test(location) || /\bON\b/.test(location);
+
+  if (alreadyOntarioFocused) {
+    return location;
+  }
+
+  return `${location} Ontario Canada`;
+}
+
+async function fetchGeocodingResults(location, count = 10) {
   const url = new URL(GEOCODING_API_URL);
   url.searchParams.set("name", location);
-  url.searchParams.set("count", "1");
+  url.searchParams.set("count", String(count));
   url.searchParams.set("language", "en");
   url.searchParams.set("format", "json");
 
@@ -14,21 +48,94 @@ export async function geocodeLocation(location) {
     throw new Error("Could not geocode location.");
   }
 
-  const data = await response.json();
+  return response.json();
+}
 
-  if (!data.results || data.results.length === 0) {
-    throw new Error(`No location found for "${location}".`);
+function getBestOntarioResult(results) {
+  const ontarioResults = results.filter((result) => {
+    return result.country === "Canada" && result.admin1 === "Ontario";
+  });
+
+  if (ontarioResults.length === 0) {
+    return results[0];
   }
 
-  const result = data.results[0];
+  ontarioResults.sort((a, b) => {
+    return getGeocodingResultScore(b) - getGeocodingResultScore(a);
+  });
 
-  return {
-    name: result.name,
-    country: result.country,
-    region: result.admin1 || null,
-    lat: result.latitude,
-    lon: result.longitude,
+  return ontarioResults[0];
+}
+
+function getGeocodingResultScore(result) {
+  return (
+    getFeatureScore(result.feature_code) +
+    getAdminScore(result) +
+    getPopulationScore(result.population)
+  );
+}
+
+function getFeatureScore(featureCode) {
+  const preferredFeatureScores = {
+    PPLA: 100,
+    PPLA2: 95,
+    PPLA3: 90,
+    PPLA4: 85,
+    PPL: 80,
+    PPLL: 70,
+    PPLX: 20,
   };
+
+  return preferredFeatureScores[featureCode] || 0;
+}
+
+function getAdminScore(result) {
+  const adminText = [result.admin2, result.admin3, result.admin4]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  if (
+    adminText.includes("city") ||
+    adminText.includes("town") ||
+    adminText.includes("village") ||
+    adminText.includes("municipality")
+  ) {
+    return 20;
+  }
+
+  if (
+    adminText.includes("neighbourhood") ||
+    adminText.includes("neighborhood") ||
+    adminText.includes("district") ||
+    adminText.includes("suburb") ||
+    adminText.includes("borough")
+  ) {
+    return -20;
+  }
+
+  return 0;
+}
+
+function getPopulationScore(population) {
+  if (!population) {
+    return 0;
+  }
+
+  return Math.min(population / 1000, 100);
+}
+
+function getBaseLocation(location) {
+  const baseLocation = location
+    .replace(/\bOntario\b/gi, "")
+    .replace(/\bCanada\b/gi, "")
+    .replace(/\bON\b/g, "");
+
+  return normalizeLocationText(baseLocation) || location;
+}
+
+function normalizeLocationText(location) {
+  return location.trim().replace(/\s+/g, " ");
 }
 
 export async function getCurrentWeather(lat, lon) {

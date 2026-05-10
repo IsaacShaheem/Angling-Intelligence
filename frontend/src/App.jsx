@@ -1,9 +1,10 @@
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom'
 
 const LandingPage = lazy(() => import('./pages/LandingPage.jsx'))
 const ResultsPage = lazy(() => import('./pages/ResultsPage.jsx'))
+const WaterDetailPage = lazy(() => import('./pages/WaterDetailPage.jsx'))
 
 export default function App() {
   return (
@@ -15,20 +16,22 @@ export default function App() {
 
 function AnimatedRoutes() {
   const location = useLocation()
+  const reduceMotion = useReducedMotion()
 
   return (
     <AnimatePresence mode="wait">
       <motion.div
         key={location.pathname}
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -6 }}
-        transition={{ duration: 0.2, ease: 'easeOut' }}
+        initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 10 }}
+        animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+        exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -8 }}
+        transition={{ duration: reduceMotion ? 0.01 : 0.24, ease: 'easeOut' }}
       >
         <Suspense fallback={<RouteFallback />}>
           <Routes location={location}>
             <Route path="/" element={<LandingPage />} />
             <Route path="/results" element={<ResultsPage />} />
+            <Route path="/water/:id" element={<WaterDetailPage />} />
           </Routes>
         </Suspense>
       </motion.div>

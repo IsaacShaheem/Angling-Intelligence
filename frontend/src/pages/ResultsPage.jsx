@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, Loader2, MapPinned, Waves } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Navbar from '../components/Navbar.jsx'
 import NearbyWatersGrid from '../components/NearbyWatersGrid.jsx'
 import WeatherBanner from '../components/WeatherBanner.jsx'
-import { fetchNearbyWaters, fetchWaterById } from '../services/api.js'
+import { fetchNearbyWaters } from '../services/api.js'
 
 export default function ResultsPage() {
   const routerLocation = useLocation()
@@ -15,12 +15,8 @@ export default function ResultsPage() {
   const [location, setLocation] = useState(requestedLocation)
   const [weather, setWeather] = useState(null)
   const [waters, setWaters] = useState([])
-  const [expandedWaterId, setExpandedWaterId] = useState(null)
-  const [waterDetails, setWaterDetails] = useState({})
   const [loadingWaters, setLoadingWaters] = useState(true)
-  const [loadingWaterId, setLoadingWaterId] = useState(null)
   const [resultsError, setResultsError] = useState('')
-  const [waterErrors, setWaterErrors] = useState({})
   const [retryCount, setRetryCount] = useState(0)
 
   useEffect(() => {
@@ -58,32 +54,6 @@ export default function ResultsPage() {
     }
   }, [requestedLocation, retryCount])
 
-  const handleToggleWater = useCallback(async (water) => {
-    if (expandedWaterId === water.id) {
-      setExpandedWaterId(null)
-      return
-    }
-
-    setExpandedWaterId(water.id)
-
-    if (waterDetails[water.id]) return
-
-    setLoadingWaterId(water.id)
-    setWaterErrors((current) => ({ ...current, [water.id]: '' }))
-
-    try {
-      const response = await fetchWaterById(water.id)
-      setWaterDetails((current) => ({ ...current, [water.id]: response }))
-    } catch (error) {
-      setWaterErrors((current) => ({
-        ...current,
-        [water.id]: error.message || 'Could not load this water.',
-      }))
-    } finally {
-      setLoadingWaterId(null)
-    }
-  }, [expandedWaterId, waterDetails])
-
   const hasResults = useMemo(() => waters.length > 0 && weather, [waters, weather])
   const nearestWater = waters[0]
 
@@ -116,7 +86,7 @@ export default function ResultsPage() {
               Waters near {location}
             </h1>
             <p className="mt-5 max-w-2xl text-lg leading-8 text-white/62">
-              Expand a water to compare today’s best species opportunities without leaving the list.
+              Choose the lake or reservoir you want to fish, then step into species-level intelligence.
             </p>
           </div>
 
@@ -171,14 +141,7 @@ export default function ResultsPage() {
       {hasResults ? (
         <>
           <WeatherBanner weather={weather} location={location} />
-          <NearbyWatersGrid
-            waters={waters}
-            expandedWaterId={expandedWaterId}
-            waterDetails={waterDetails}
-            waterErrors={waterErrors}
-            loadingWaterId={loadingWaterId}
-            onToggleWater={handleToggleWater}
-          />
+          <NearbyWatersGrid waters={waters} weather={weather} location={location} />
         </>
       ) : null}
 
