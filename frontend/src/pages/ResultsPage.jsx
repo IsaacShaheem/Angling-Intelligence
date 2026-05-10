@@ -7,15 +7,18 @@ import NearbyWatersGrid from '../components/NearbyWatersGrid.jsx'
 import WeatherBanner from '../components/WeatherBanner.jsx'
 import { fetchNearbyWaters } from '../services/api.js'
 
+const LOCATION_NOT_FOUND_MESSAGE = 'Location not found. Try another Ontario city or town.'
+
 export default function ResultsPage() {
   const routerLocation = useLocation()
   const [searchParams] = useSearchParams()
   const requestedLocation = routerLocation.state?.location || searchParams.get('location') || 'Guelph, ON'
+  const preloadedResults = routerLocation.state?.nearbyResults
 
-  const [location, setLocation] = useState(requestedLocation)
-  const [weather, setWeather] = useState(null)
-  const [waters, setWaters] = useState([])
-  const [loadingWaters, setLoadingWaters] = useState(true)
+  const [location, setLocation] = useState(preloadedResults?.location || requestedLocation)
+  const [weather, setWeather] = useState(preloadedResults?.weather || null)
+  const [waters, setWaters] = useState(preloadedResults?.waters || [])
+  const [loadingWaters, setLoadingWaters] = useState(!preloadedResults)
   const [resultsError, setResultsError] = useState('')
   const [retryCount, setRetryCount] = useState(0)
 
@@ -23,6 +26,15 @@ export default function ResultsPage() {
     let active = true
 
     async function loadResults() {
+      if (preloadedResults && retryCount === 0) {
+        setLocation(preloadedResults.location)
+        setWeather(preloadedResults.weather)
+        setWaters(preloadedResults.waters)
+        setResultsError('')
+        setLoadingWaters(false)
+        return
+      }
+
       setLoadingWaters(true)
       setResultsError('')
 
@@ -39,7 +51,9 @@ export default function ResultsPage() {
 
         setWeather(null)
         setWaters([])
-        setResultsError(error.message || 'Could not load nearby waters.')
+        setResultsError(error.message === 'Location not found'
+          ? LOCATION_NOT_FOUND_MESSAGE
+          : error.message || 'Could not load nearby waters.')
       } finally {
         if (active) {
           setLoadingWaters(false)
@@ -52,7 +66,7 @@ export default function ResultsPage() {
     return () => {
       active = false
     }
-  }, [requestedLocation, retryCount])
+  }, [preloadedResults, requestedLocation, retryCount])
 
   const hasResults = useMemo(() => waters.length > 0 && weather, [waters, weather])
   const nearestWater = waters[0]

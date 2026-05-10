@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { memo, useCallback, useState } from 'react'
+import { fetchFishTip } from '../services/api.js'
 import ExpandableSpeciesCard from './ExpandableSpeciesCard.jsx'
 
 const container = {
@@ -15,8 +16,11 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.24, ease: 'easeOut' } },
 }
 
-function SpeciesGrid({ species, weather }) {
+function SpeciesGrid({ species, water, weather }) {
   const [expandedSpecies, setExpandedSpecies] = useState(null)
+  const [aiTips, setAiTips] = useState({})
+  const [loadingTips, setLoadingTips] = useState({})
+  const [tipErrors, setTipErrors] = useState({})
 
   const handleToggle = useCallback((name) => {
     setExpandedSpecies((current) => (current === name ? null : name))
@@ -25,6 +29,42 @@ function SpeciesGrid({ species, weather }) {
   const handleClose = useCallback(() => {
     setExpandedSpecies(null)
   }, [])
+
+  const handleGenerateTip = useCallback(async (fish) => {
+    const speciesName = fish.species
+
+    setLoadingTips((current) => ({
+      ...current,
+      [speciesName]: true,
+    }))
+    setTipErrors((current) => ({
+      ...current,
+      [speciesName]: '',
+    }))
+
+    try {
+      const aiTip = await fetchFishTip({
+        water,
+        speciesResult: fish,
+        weather,
+      })
+
+      setAiTips((current) => ({
+        ...current,
+        [speciesName]: aiTip,
+      }))
+    } catch (error) {
+      setTipErrors((current) => ({
+        ...current,
+        [speciesName]: error.message || 'Could not generate this Gemini tip.',
+      }))
+    } finally {
+      setLoadingTips((current) => ({
+        ...current,
+        [speciesName]: false,
+      }))
+    }
+  }, [water, weather])
 
   return (
     <section className="relative mx-auto max-w-6xl px-5 pb-20 pt-12 sm:px-8 sm:pt-16">
@@ -64,10 +104,14 @@ function SpeciesGrid({ species, weather }) {
               <ExpandableSpeciesCard
                 fish={fish}
                 weather={weather}
+                aiTip={aiTips[fish.species] || ''}
+                tipError={tipErrors[fish.species] || ''}
+                tipLoading={Boolean(loadingTips[fish.species])}
                 expanded={expandedSpecies === fish.species}
                 dimmed={Boolean(expandedSpecies) && expandedSpecies !== fish.species}
                 onToggle={() => handleToggle(fish.species)}
                 onClose={handleClose}
+                onGenerateTip={() => handleGenerateTip(fish)}
               />
             </motion.div>
           ))}

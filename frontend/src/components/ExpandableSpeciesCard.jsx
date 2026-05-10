@@ -1,33 +1,38 @@
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { Brain, ChevronDown, CircleDot, CloudSun, Leaf, Thermometer, Timer, X } from 'lucide-react'
+import { Brain, ChevronDown, CircleDot, CloudSun, Leaf, Loader2, Thermometer, Timer, X } from 'lucide-react'
 import { memo, useEffect, useState } from 'react'
 import { fallbackFishImage, fallbackFishImageBackup, fishImages } from '../data/fishImages'
 
-function scoreLabel(score) {
-  if (score >= 80) return 'Prime'
-  if (score >= 60) return 'Strong'
-  return 'Challenging'
+function difficultyGradient(difficulty) {
+  if (difficulty === 'Easy') return 'from-emerald-400 to-green-300'
+  if (difficulty === 'Medium') return 'from-yellow-300 to-amber-200'
+  if (difficulty === 'Hard') return 'from-orange-400 to-amber-300'
+  return 'from-red-500 to-rose-400'
 }
 
-function scoreTone(score) {
-  if (score >= 80) return 'text-emerald-100'
-  if (score >= 60) return 'text-cyan-100'
-  return 'text-orange-100'
-}
-
-function scoreGradient(score) {
-  if (score >= 80) return 'from-emerald-300 to-cyan-200'
-  if (score >= 60) return 'from-cyan-200 to-yellow-100'
-  return 'from-orange-300 to-rose-300'
-}
-
-function ExpandableSpeciesCard({ fish, weather, expanded, dimmed, onToggle, onClose }) {
+function ExpandableSpeciesCard({
+  fish,
+  weather,
+  aiTip,
+  tipError,
+  tipLoading,
+  expanded,
+  dimmed,
+  onToggle,
+  onClose,
+  onGenerateTip,
+}) {
   const reduceMotion = useReducedMotion()
   const [imageSrc, setImageSrc] = useState(fishImages[fish.species] || fallbackFishImage)
   const methods = Array.isArray(fish.methods) ? fish.methods : []
   const reasons = Array.isArray(fish.reasons) ? fish.reasons : []
-  const label = scoreLabel(fish.score)
-  const explanation = fish.aiTip || fish.shortExplanation || `${fish.species} is currently rated ${fish.score}/100.`
+  const difficulty = fish.difficulty || 'Medium'
+  const explanation = fish.shortExplanation || `${fish.species} have ${difficulty.toLowerCase()} difficulty today.`
+  const barScale = Math.max(0, Math.min(1, (fish.score || 0) / 100))
+  const hasGeneratedTip = Boolean(aiTip)
+  const tipButtonClassName = hasGeneratedTip
+    ? 'mt-4 inline-flex items-center gap-2 rounded-full border border-emerald-100/25 bg-emerald-100/14 px-4 py-2 text-sm font-black text-emerald-50 transition-colors disabled:cursor-not-allowed'
+    : 'mt-4 inline-flex items-center gap-2 rounded-full bg-cyan-100 px-4 py-2 text-sm font-black text-slate-950 transition-colors hover:bg-white disabled:cursor-not-allowed disabled:bg-white/18 disabled:text-white/50'
 
   useEffect(() => {
     setImageSrc(fishImages[fish.species] || fallbackFishImage)
@@ -90,20 +95,20 @@ function ExpandableSpeciesCard({ fish, weather, expanded, dimmed, onToggle, onCl
           <div className="absolute inset-0 bg-gradient-to-t from-[#06111d] via-[#06111d]/10 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#06111d] to-transparent" />
           <div className="absolute left-4 top-4 rounded-full border border-white/10 bg-black/28 px-3 py-1.5 text-xs font-black uppercase tracking-[0.14em] text-white/78 backdrop-blur-sm">
-            {fish.difficulty} difficulty
+            {difficulty} difficulty
           </div>
           <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-4">
             <div className="min-w-0">
               <h3 className={`${expanded ? 'text-4xl sm:text-5xl' : 'text-2xl'} font-black leading-none text-white`}>
                 {fish.species}
               </h3>
-              <p className="mt-2 text-sm font-bold text-cyan-100/70">{label} Conditions</p>
+              <p className="mt-2 text-sm font-bold text-cyan-100/70">{difficulty} Difficulty</p>
             </div>
             <div className="shrink-0 text-right">
-              <p className={`${expanded ? 'text-6xl' : 'text-4xl'} font-black leading-none ${scoreTone(fish.score)}`}>
-                {fish.score}
+              <p className={`${expanded ? 'text-3xl sm:text-4xl' : 'text-2xl'} font-black leading-none text-white`}>
+                {difficulty}
               </p>
-              <p className="mt-1 text-xs font-black uppercase tracking-[0.16em] text-white/42">score</p>
+              <p className="mt-1 text-xs font-black uppercase tracking-[0.16em] text-white/42">difficulty</p>
             </div>
           </div>
         </div>
@@ -111,8 +116,8 @@ function ExpandableSpeciesCard({ fish, weather, expanded, dimmed, onToggle, onCl
         <div className="flex items-center justify-between gap-4 px-4 py-4 sm:px-5">
           <div className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-white/10">
             <div
-              className={`h-full origin-left rounded-full bg-gradient-to-r ${scoreGradient(fish.score)}`}
-              style={{ transform: `scaleX(${fish.score / 100})` }}
+              className={`h-full origin-left rounded-full bg-gradient-to-r ${difficultyGradient(difficulty)}`}
+              style={{ transform: `scaleX(${barScale})` }}
             />
           </div>
           <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/[0.08] text-white/72">
@@ -143,8 +148,8 @@ function ExpandableSpeciesCard({ fish, weather, expanded, dimmed, onToggle, onCl
                 </div>
                 {reasons.length > 0 ? (
                   <div className="mt-4 grid gap-2">
-                    {reasons.map((reason) => (
-                      <p key={reason} className="flex gap-2 text-sm leading-6 text-white/66">
+                    {reasons.map((reason, index) => (
+                      <p key={`${reason}-${index}`} className="flex gap-2 text-sm leading-6 text-white/66">
                         <CircleDot className="mt-1.5 h-3 w-3 shrink-0 text-emerald-100/72" />
                         {reason}
                       </p>
@@ -177,6 +182,28 @@ function ExpandableSpeciesCard({ fish, weather, expanded, dimmed, onToggle, onCl
                     AI insight
                   </p>
                   <p className="mt-3 text-sm leading-6 text-white/70">{explanation}</p>
+
+                  <button
+                    type="button"
+                    onClick={onGenerateTip}
+                    disabled={tipLoading || hasGeneratedTip}
+                    className={tipButtonClassName}
+                  >
+                    {tipLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Brain className="h-4 w-4" />}
+                    {hasGeneratedTip ? '✓ Gemini Tip Generated' : 'Generate Gemini Tip'}
+                  </button>
+
+                  {tipLoading ? (
+                    <p className="mt-3 text-sm font-semibold text-cyan-100/72">Generating Gemini tip...</p>
+                  ) : null}
+
+                  {!tipLoading && aiTip ? (
+                    <p className="mt-4 rounded-2xl bg-cyan-100/10 p-4 text-sm leading-6 text-white/78">{aiTip}</p>
+                  ) : null}
+
+                  {!tipLoading && tipError ? (
+                    <p className="mt-3 text-sm font-semibold text-rose-100/78">{tipError}</p>
+                  ) : null}
                 </div>
               </section>
             </div>

@@ -17,6 +17,19 @@ export async function fetchWaterById(id) {
   return normalizeWaterResponse(response)
 }
 
+export async function fetchFishTip({ water, speciesResult, weather }) {
+  const response = await apiRequest('/api/fish-tip', {
+    method: 'POST',
+    body: JSON.stringify({
+      water,
+      speciesResult,
+      weather,
+    }),
+  })
+
+  return removeScoreText(response.aiTip || '')
+}
+
 async function apiRequest(path, options = {}) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
@@ -85,11 +98,11 @@ function normalizeWaterSummary(water = {}) {
 }
 
 function normalizeSpeciesScore(fish = {}) {
-  const reasons = Array.isArray(fish.reasons) ? fish.reasons : []
+  const reasons = Array.isArray(fish.reasons) ? fish.reasons.map((reason) => cleanReason(reason)) : []
   const methods = Array.isArray(fish.methods) ? fish.methods : []
   const species = fish.species || 'This species'
   const score = typeof fish.score === 'number' ? fish.score : 0
-  const difficulty = fish.difficulty || 'Unknown'
+  const difficulty = normalizeDifficultyLabel(fish.difficulty, score)
 
   return {
     ...fish,
@@ -99,12 +112,32 @@ function normalizeSpeciesScore(fish = {}) {
     reasons,
     methods,
     shortExplanation:
-      fish.shortExplanation ||
-      `${species} is rated ${score}/100 today. ${reasons[0] || 'Use current conditions and local structure to choose your presentation.'}`,
-    aiTip:
-      fish.aiTip ||
-      `Start with the strongest nearby structure and adjust speed based on the ${difficulty.toLowerCase()} difficulty rating.`,
+      removeScoreText(fish.shortExplanation) ||
+      `${species} have ${difficulty.toLowerCase()} difficulty today. ${reasons[0] || 'Use current conditions and local structure to choose your presentation.'}`,
+    aiTip: removeScoreText(fish.aiTip) || '',
   }
+}
+
+function normalizeDifficultyLabel(value, score) {
+  if (['Easy', 'Medium', 'Hard', 'Very Hard'].includes(value)) return value
+
+  if (score >= 80) return 'Easy'
+  if (score >= 60) return 'Medium'
+  if (score >= 40) return 'Hard'
+
+  return 'Very Hard'
+}
+
+function cleanReason(reason) {
+  return String(reason || '').replace(/^[+-]?\d+:\s*/, '')
+}
+
+function removeScoreText(text) {
+  return String(text || '')
+    .replace(/\b[\w\s'-]+ (?:is|are) rated \d+\/100 today\.\s*/gi, '')
+    .replace(/\b\d+\/100\b/g, '')
+    .replace(/\bcurrent score\b/gi, 'current conditions')
+    .trim()
 }
 
 function normalizeWeather(weather = {}) {
