@@ -1,7 +1,7 @@
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { Brain, ChevronDown, CircleDot, CloudSun, Leaf, Thermometer, Timer, X } from 'lucide-react'
 import { memo, useEffect, useState } from 'react'
-import { fallbackFishImage, fishImages } from '../data/fishImages'
+import { fallbackFishImage, fallbackFishImageBackup, fishImages } from '../data/fishImages'
 
 function scoreLabel(score) {
   if (score >= 80) return 'Prime'
@@ -28,6 +28,10 @@ function ExpandableSpeciesCard({ fish, weather, expanded, dimmed, onToggle, onCl
   const reasons = Array.isArray(fish.reasons) ? fish.reasons : []
   const label = scoreLabel(fish.score)
   const explanation = fish.aiTip || fish.shortExplanation || `${fish.species} is currently rated ${fish.score}/100.`
+
+  useEffect(() => {
+    setImageSrc(fishImages[fish.species] || fallbackFishImage)
+  }, [fish.species])
 
   useEffect(() => {
     if (!expanded) return undefined
@@ -59,19 +63,32 @@ function ExpandableSpeciesCard({ fish, weather, expanded, dimmed, onToggle, onCl
         className="group block w-full text-left"
       >
         <div className={`relative overflow-hidden ${expanded ? 'aspect-[16/9] sm:aspect-[21/9]' : 'aspect-[4/3]'}`}>
-          <img
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_38%,rgba(125,211,252,0.18),transparent_42%),linear-gradient(180deg,rgba(8,47,73,0.34),rgba(6,17,29,0.96))]" />
+          <div className="absolute inset-x-8 top-6 h-px bg-gradient-to-r from-transparent via-cyan-100/38 to-transparent" />
+          <motion.img
+            layout
             src={imageSrc}
             alt={fish.species}
             loading="lazy"
             decoding="async"
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.035]"
+            className={`absolute inset-0 m-auto h-[72%] w-[82%] object-contain object-center drop-shadow-[0_18px_22px_rgba(0,0,0,0.32)] ${
+              expanded ? 'sm:h-[82%] sm:w-[78%]' : ''
+            }`}
+            animate={reduceMotion ? { opacity: 1 } : { opacity: 1, scale: expanded ? 1.045 : 1 }}
+            transition={{ duration: reduceMotion ? 0.01 : 0.32, ease: 'easeOut' }}
             onError={() => {
               if (imageSrc !== fallbackFishImage) {
                 setImageSrc(fallbackFishImage)
+                return
+              }
+
+              if (fallbackFishImage !== fallbackFishImageBackup && imageSrc !== fallbackFishImageBackup) {
+                setImageSrc(fallbackFishImageBackup)
               }
             }}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#06111d] via-[#06111d]/24 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#06111d] via-[#06111d]/10 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#06111d] to-transparent" />
           <div className="absolute left-4 top-4 rounded-full border border-white/10 bg-black/28 px-3 py-1.5 text-xs font-black uppercase tracking-[0.14em] text-white/78 backdrop-blur-sm">
             {fish.difficulty} difficulty
           </div>
