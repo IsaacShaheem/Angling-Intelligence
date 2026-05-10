@@ -3,11 +3,16 @@ import { motion } from 'framer-motion'
 import { memo } from 'react'
 
 function WeatherBanner({ weather, location }) {
+  const condition = weather?.condition || 'Current conditions'
+  const tempC = weather?.tempC ?? '--'
+  const windKph = weather?.windKph ?? '--'
+  const season = weather?.season || 'Current'
+  const insight = weather?.insight || 'Current weather is available for this location.'
   const details = [
-    { icon: CloudSun, label: weather.condition },
-    { icon: Thermometer, label: `${weather.tempC}°C` },
-    { icon: Wind, label: `Wind ${weather.windKph} km/h` },
-    { icon: Leaf, label: weather.season },
+    { icon: CloudSun, label: condition },
+    { icon: Thermometer, label: `${tempC}°C` },
+    { icon: Wind, label: `Wind ${windKph} km/h` },
+    { icon: Leaf, label: season },
   ]
 
   return (
@@ -22,7 +27,7 @@ function WeatherBanner({ weather, location }) {
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-100/70">{location}</p>
-            <p className="mt-2 max-w-2xl text-lg font-medium leading-7 text-white/84">{weather.insight}</p>
+            <p className="mt-2 max-w-2xl text-lg font-medium leading-7 text-white/84">{insight}</p>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {details.map((item) => (

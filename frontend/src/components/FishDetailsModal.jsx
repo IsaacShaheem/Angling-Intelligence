@@ -8,6 +8,9 @@ function scoreColor(score) {
 }
 
 export default function FishDetailsModal({ fish, onClose }) {
+  const methods = Array.isArray(fish?.methods) ? fish.methods : []
+  const reasons = Array.isArray(fish?.reasons) ? fish.reasons : []
+
   return (
     <AnimatePresence>
       {fish ? (
@@ -56,19 +59,21 @@ export default function FishDetailsModal({ fish, onClose }) {
               <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.07] p-5">
                 <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/45">Methods and baits</p>
                 <div className="mt-4 flex flex-wrap gap-2">
-                  {fish.methods.map((method) => (
+                  {methods.map((method) => (
                     <span key={method} className="rounded-full bg-cyan-100/10 px-3 py-2 text-sm font-semibold text-cyan-50">
                       {method}
                     </span>
                   ))}
                 </div>
-                <p className="mt-5 leading-7 text-white/72">{fish.shortExplanation}</p>
+                <p className="mt-5 leading-7 text-white/72">
+                  {fish.shortExplanation || `${fish.species} is currently rated ${fish.score}/100.`}
+                </p>
               </div>
             </div>
 
             <div className="mt-4 grid gap-4 md:grid-cols-2">
-              <Insight icon={Brain} title="AI fishing tip" text={fish.aiTip} />
-              <Insight icon={CloudSun} title="Condition reasoning" text={fish.reasons.join(' ')} />
+              <Insight icon={Brain} title="AI fishing tip" text={fish.aiTip || 'Adjust depth and speed based on the strongest visible structure.'} />
+              <Insight icon={CloudSun} title="Condition reasoning" text={reasons.join(' ') || 'Current conditions were used to score this species.'} />
             </div>
           </motion.article>
         </motion.div>

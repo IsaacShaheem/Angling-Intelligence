@@ -6,14 +6,18 @@ import FishCard from './FishCard.jsx'
 import FishSpeciesCard from './FishSpeciesCard.jsx'
 
 function titleCase(value) {
+  if (!value) return 'Medium'
+
   return value.charAt(0).toUpperCase() + value.slice(1)
 }
 
-function WaterCard({ water, expanded, details, isLoading, onToggle }) {
+function WaterCard({ water, expanded, details, error, isLoading, onToggle }) {
   const accessibility = `${titleCase(water.accessibility)} access`
   const pressure = `${titleCase(water.pressureLevel)} pressure`
   const species = details?.speciesScores ?? []
   const handleToggle = useCallback(() => onToggle(water), [onToggle, water])
+  const bestWindow = water.bestWindow || 'Today'
+  const shoreline = details?.water?.shoreline || water.shoreline || `${water.type} water near ${water.region}`
 
   return (
     <article
@@ -56,7 +60,7 @@ function WaterCard({ water, expanded, details, isLoading, onToggle }) {
         <div className="mt-6 flex items-center justify-between rounded-2xl border border-white/[0.06] bg-black/15 px-4 py-3">
           <span className="text-sm text-white/55">{expanded ? 'Tap to close' : 'Best window'}</span>
           <span className="flex items-center gap-3 text-sm font-bold text-emerald-100">
-            {expanded ? 'Showing opportunities' : water.bestWindow}
+            {expanded ? 'Showing opportunities' : bestWindow}
             <ChevronDown
               className={`h-4 w-4 transition-transform duration-200 ${expanded ? 'rotate-180 text-cyan-100' : ''}`}
             />
@@ -82,7 +86,7 @@ function WaterCard({ water, expanded, details, isLoading, onToggle }) {
                   <h4 className="mt-2 text-xl font-black text-white">Species worth targeting today</h4>
                 </div>
                 <p className="max-w-md text-sm leading-6 text-white/56">
-                  {details?.water?.shoreline || water.shoreline}
+                  {shoreline}
                 </p>
               </div>
 
@@ -90,6 +94,10 @@ function WaterCard({ water, expanded, details, isLoading, onToggle }) {
                 <div className="flex items-center gap-3 rounded-2xl bg-white/[0.065] px-4 py-4 text-sm font-semibold text-white/68">
                   <Loader2 className="h-4 w-4 animate-spin text-cyan-100" />
                   Loading fishing opportunities
+                </div>
+              ) : error ? (
+                <div className="rounded-2xl bg-rose-400/[0.08] px-4 py-4 text-sm font-semibold text-rose-50/80">
+                  {error}
                 </div>
               ) : (
                 <>

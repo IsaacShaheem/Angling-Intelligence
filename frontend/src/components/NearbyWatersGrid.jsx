@@ -19,6 +19,7 @@ function NearbyWatersGrid({
   waters,
   expandedWaterId,
   waterDetails,
+  waterErrors,
   loadingWaterId,
   onToggleWater,
 }) {
@@ -45,6 +46,7 @@ function NearbyWatersGrid({
               water={water}
               expanded={expandedWaterId === water.id}
               details={waterDetails[water.id]}
+              error={waterErrors?.[water.id]}
               isLoading={loadingWaterId === water.id}
               onToggle={onToggleWater}
             />

@@ -20,6 +20,9 @@ function scoreLabel(score) {
 }
 
 function FishSpeciesCard({ fish }) {
+  const methods = Array.isArray(fish.methods) ? fish.methods : []
+  const explanation = fish.shortExplanation || `${fish.species} is currently rated ${fish.score}/100.`
+
   return (
     <article className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.085] to-white/[0.045] p-4 text-left shadow-sm shadow-black/10 transition-[background-color,border-color,transform] duration-200 hover:-translate-y-0.5 hover:border-emerald-200/25 hover:bg-white/[0.07] sm:p-5">
       <div className="relative grid gap-4 lg:grid-cols-[1fr_10rem] lg:items-center">
@@ -33,18 +36,20 @@ function FishSpeciesCard({ fish }) {
               <Score score={fish.score} />
             </div>
           </div>
-          <p className="mt-4 max-w-3xl text-sm leading-6 text-white/66">{fish.shortExplanation}</p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            {fish.methods.map((method) => (
-              <span
-                key={method}
-                className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.08] px-3 py-1.5 text-xs font-semibold text-white/68"
-              >
-                <CircleDot className="h-3 w-3 text-cyan-100/70" />
-                {method}
-              </span>
-            ))}
-          </div>
+          <p className="mt-4 max-w-3xl text-sm leading-6 text-white/66">{explanation}</p>
+          {methods.length > 0 ? (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {methods.map((method) => (
+                <span
+                  key={method}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.08] px-3 py-1.5 text-xs font-semibold text-white/68"
+                >
+                  <CircleDot className="h-3 w-3 text-cyan-100/70" />
+                  {method}
+                </span>
+              ))}
+            </div>
+          ) : null}
         </div>
 
         <div className="hidden lg:block">

@@ -19,20 +19,36 @@ export default function ResultsPage() {
   const [waterDetails, setWaterDetails] = useState({})
   const [loadingWaters, setLoadingWaters] = useState(true)
   const [loadingWaterId, setLoadingWaterId] = useState(null)
+  const [resultsError, setResultsError] = useState('')
+  const [waterErrors, setWaterErrors] = useState({})
+  const [retryCount, setRetryCount] = useState(0)
 
   useEffect(() => {
     let active = true
 
     async function loadResults() {
       setLoadingWaters(true)
-      const response = await fetchNearbyWaters(requestedLocation)
+      setResultsError('')
 
-      if (!active) return
+      try {
+        const response = await fetchNearbyWaters(requestedLocation)
 
-      setLocation(response.location)
-      setWeather(response.weather)
-      setWaters(response.waters)
-      setLoadingWaters(false)
+        if (!active) return
+
+        setLocation(response.location)
+        setWeather(response.weather)
+        setWaters(response.waters)
+      } catch (error) {
+        if (!active) return
+
+        setWeather(null)
+        setWaters([])
+        setResultsError(error.message || 'Could not load nearby waters.')
+      } finally {
+        if (active) {
+          setLoadingWaters(false)
+        }
+      }
     }
 
     loadResults()
@@ -40,7 +56,7 @@ export default function ResultsPage() {
     return () => {
       active = false
     }
-  }, [requestedLocation])
+  }, [requestedLocation, retryCount])
 
   const handleToggleWater = useCallback(async (water) => {
     if (expandedWaterId === water.id) {
@@ -53,9 +69,19 @@ export default function ResultsPage() {
     if (waterDetails[water.id]) return
 
     setLoadingWaterId(water.id)
-    const response = await fetchWaterById(water.id)
-    setWaterDetails((current) => ({ ...current, [water.id]: response }))
-    setLoadingWaterId(null)
+    setWaterErrors((current) => ({ ...current, [water.id]: '' }))
+
+    try {
+      const response = await fetchWaterById(water.id)
+      setWaterDetails((current) => ({ ...current, [water.id]: response }))
+    } catch (error) {
+      setWaterErrors((current) => ({
+        ...current,
+        [water.id]: error.message || 'Could not load this water.',
+      }))
+    } finally {
+      setLoadingWaterId(null)
+    }
   }, [expandedWaterId, waterDetails])
 
   const hasResults = useMemo(() => waters.length > 0 && weather, [waters, weather])
@@ -126,6 +152,22 @@ export default function ResultsPage() {
         </section>
       ) : null}
 
+      {!loadingWaters && resultsError ? (
+        <section className="relative mx-auto mt-14 max-w-6xl px-5 sm:px-8">
+          <div className="rounded-[2rem] border border-rose-200/15 bg-rose-400/[0.07] p-8 text-center">
+            <p className="text-lg font-bold text-white">Could not load nearby waters</p>
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-white/62">{resultsError}</p>
+            <button
+              type="button"
+              onClick={() => setRetryCount((count) => count + 1)}
+              className="mt-5 rounded-full bg-cyan-100 px-5 py-2 text-sm font-bold text-slate-950 transition-colors hover:bg-white"
+            >
+              Try again
+            </button>
+          </div>
+        </section>
+      ) : null}
+
       {hasResults ? (
         <>
           <WeatherBanner weather={weather} location={location} />
@@ -133,13 +175,14 @@ export default function ResultsPage() {
             waters={waters}
             expandedWaterId={expandedWaterId}
             waterDetails={waterDetails}
+            waterErrors={waterErrors}
             loadingWaterId={loadingWaterId}
             onToggleWater={handleToggleWater}
           />
         </>
       ) : null}
 
-      {!loadingWaters && !hasResults ? (
+      {!loadingWaters && !resultsError && !hasResults ? (
         <section className="relative mx-auto mt-14 max-w-6xl px-5 sm:px-8">
           <div className="rounded-[2rem] border border-white/10 bg-white/[0.06] p-8 text-center">
             <p className="text-lg font-bold text-white">No nearby waters found</p>
