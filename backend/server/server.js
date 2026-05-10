@@ -25,7 +25,16 @@ app.post("/api/nearby-waters", async (req, res) => {
       });
     }
 
-    const geocodedLocation = await geocodeLocation(location);
+    let geocodedLocation;
+
+    try {
+      geocodedLocation = await geocodeLocation(location);
+    } catch {
+      return res.status(400).json({
+        error: "Location not found",
+      });
+    }
+
     const coordinates = {
       lat: geocodedLocation.lat,
       lon: geocodedLocation.lon,

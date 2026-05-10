@@ -8,7 +8,7 @@ const fadeUp = {
   show: { opacity: 1, y: 0 },
 }
 
-function HeroSection({ onSearch, isLoading }) {
+function HeroSection({ onSearch, isLoading, searchError }) {
   return (
     <section
       id="top"
@@ -62,7 +62,7 @@ function HeroSection({ onSearch, isLoading }) {
           }}
           transition={{ duration: 0.3, ease: 'easeOut' }}
         />
-        <SearchBar onSearch={onSearch} isLoading={isLoading} />
+        <SearchBar onSearch={onSearch} isLoading={isLoading} error={searchError} />
         <p className="mx-auto mt-5 max-w-lg text-sm font-medium text-white/42">
           Built for nearby Ontario waters, shifting weather, and better first casts.
         </p>

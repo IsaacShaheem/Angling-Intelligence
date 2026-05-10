@@ -15,14 +15,38 @@ function fallbackFishTip({ water, speciesResult, weather }) {
   const waterName = water?.name || "this water";
   const description = weather?.description || "the current conditions";
   const temperature = weather?.temperature?.value;
-  const reasons = Array.isArray(speciesResult?.reasons)
-    ? speciesResult.reasons.join(", ")
-    : speciesResult?.reasons;
-  const reasonText = reasons || "the available fishing factors";
   const temperatureText =
-    temperature === undefined || temperature === null ? "" : ` around ${temperature}`;
+    temperature === undefined || temperature === null ? "" : ` around ${temperature}C`;
 
-  return `${species} at ${waterName} could be worth a try with ${description}${temperatureText}. The outlook is shaped by ${reasonText}, so keep it simple with a worm, small jig, or slow retrieve and treat it as a useful starting point rather than a sure thing.`;
+  return `At ${waterName}, start by casting for ${species} around visible structure, weed edges, points, or shaded cover in ${description}${temperatureText}. Use a simple jig, spinnerbait, spoon, or live bait and slow down with pauses if the fish are not reacting.`;
+}
+
+function cleanReason(reason) {
+  return String(reason || "").replace(/^[+-]?\d+:\s*/, "").trim();
+}
+
+function getReasonContext(reasons) {
+  if (Array.isArray(reasons)) {
+    return reasons.map((reason) => cleanReason(reason)).filter(Boolean).join("; ");
+  }
+
+  return cleanReason(reasons);
+}
+
+function cleanGeneratedTip(text) {
+  const cleanedText = String(text || "")
+    .replace(/\b\d+\s*\/\s*100\b/g, "")
+    .replace(/(?:^|\s)[+-]\d+:\s*/g, " ")
+    .replace(/(?:^|\s)[+-]\d+\b/g, " ")
+    .replace(/\bmodifier values?\b/gi, "details")
+    .replace(/\bnumeric scores?\b/gi, "ratings")
+    .replace(/\bscore indicates\b/gi, "try")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+
+  const sentences = cleanedText.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [];
+
+  return sentences.slice(0, 2).join(" ").trim();
 }
 
 export async function generateFishTip({ water, speciesResult, weather }) {
@@ -31,33 +55,38 @@ export async function generateFishTip({ water, speciesResult, weather }) {
   }
 
   const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
-  const reasons = Array.isArray(speciesResult.reasons)
-    ? speciesResult.reasons.join(", ")
-    : speciesResult.reasons;
+  const reasonContext = getReasonContext(speciesResult?.reasons);
+  const waterName = water?.name || "this water";
+  const species = speciesResult?.species || "this fish";
+  const difficulty = speciesResult?.difficulty || "Unknown";
+  const weatherDescription = weather?.description || "current conditions";
+  const temperature = weather?.temperature?.value ?? "unknown";
 
   const prompt = `
-Write a short beginner-friendly fishing explanation/tip.
+Write a short beginner-friendly fishing tip that is practical and tactical.
 
 Rules:
 - Return only the tip text.
-- Write 2-3 natural sentences.
+- Write exactly 2 concise natural sentences.
 - Mention the species.
 - Mention the selected water.
-- Mention current conditions briefly.
-- Explain whether the fishing outlook seems promising or challenging using the reasons.
-- Include 1-2 simple bait or method suggestions.
+- Mention current conditions briefly if useful.
+- Focus on actionable advice: where to cast, lure or bait choice, retrieve speed, structure, depth, timing, and weather adjustments.
+- Use the reason context only as hidden background; do not repeat those reasons directly.
 - Do not guarantee a catch.
 - Do not mention numeric scores.
+- Do not mention signed modifier values.
 - Do not mention backend scoring systems or app scoring.
-- Do not sound overly robotic.
+- Avoid phrases like "The outlook is shaped by", "Conditions are favorable because", or "Score indicates".
+- Sound natural, practical, and non-robotic.
 
 Fishing details:
-- Water: ${water.name}
-- Species: ${speciesResult.species}
-- Difficulty: ${speciesResult.difficulty}
-- Reasons: ${reasons}
-- Weather: ${weather.description}
-- Temperature: ${weather.temperature.value}
+- Water: ${waterName}
+- Species: ${species}
+- Difficulty: ${difficulty}
+- Hidden reason context, do not quote or repeat: ${reasonContext || "No extra context provided"}
+- Weather: ${weatherDescription}
+- Temperature: ${temperature}
 `.trim();
 
   try {
@@ -66,7 +95,9 @@ Fishing details:
       contents: prompt,
     });
 
-    return response.text?.trim() || fallbackFishTip({ water, speciesResult, weather });
+    const tip = cleanGeneratedTip(response.text);
+
+    return tip || fallbackFishTip({ water, speciesResult, weather });
   } catch {
     return fallbackFishTip({ water, speciesResult, weather });
   }

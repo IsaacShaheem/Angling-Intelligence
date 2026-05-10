@@ -12,12 +12,6 @@ function titleCase(value) {
   return value.charAt(0).toUpperCase() + value.slice(1)
 }
 
-function scoreLabel(score) {
-  if (score >= 80) return 'Prime Conditions'
-  if (score >= 60) return 'Strong Conditions'
-  return 'Challenging Conditions'
-}
-
 export default function WaterDetailPage() {
   const { id } = useParams()
   const routerLocation = useLocation()
@@ -120,7 +114,7 @@ export default function WaterDetailPage() {
           <div className="rounded-[1.6rem] border border-white/10 bg-white/[0.06] p-5 shadow-md shadow-black/15 sm:p-6">
             <p className="text-xs font-bold uppercase tracking-[0.22em] text-cyan-100/58">Current weather</p>
             <p className="mt-3 max-w-3xl text-lg font-medium leading-8 text-white/76">
-              {weather?.insight || 'Current weather is being folded into the fish opportunity scores for this water.'}
+              {weather?.insight || 'Current weather is being folded into the fish difficulty guidance for this water.'}
             </p>
           </div>
 
@@ -160,7 +154,7 @@ export default function WaterDetailPage() {
       ) : null}
 
       {!loading && !error && species.length > 0 ? (
-        <SpeciesGrid species={species} weather={weather} />
+        <SpeciesGrid species={species} water={water} weather={weather} />
       ) : null}
 
       {!loading && !error && species.length === 0 ? (
@@ -192,10 +186,10 @@ function BestTargetCard({ fish, loading }) {
           <>
             <h2 className="mt-3 text-3xl font-black text-white">{fish.species}</h2>
             <p className="mt-3 text-lg font-bold text-emerald-100">
-              {fish.score} • {scoreLabel(fish.score)}
+              {fish.difficulty || 'Medium'} Difficulty
             </p>
             <p className="mt-3 text-sm leading-6 text-white/62">
-              {fish.shortExplanation || "Today's strongest target based on the current score."}
+              {fish.shortExplanation || "Today's strongest target based on the current conditions."}
             </p>
           </>
         ) : (
