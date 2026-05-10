@@ -1,0 +1,40 @@
+{
+  "hash": "eb1fc510",
+  "configHash": "e9872193",
+  "lockfileHash": "4de1c3e2",
+  "browserHash": "2eaef873",
+  "optimized": {
+    "react": {
+      "src": "../../node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "fb75e43c",
+      "needsInterop": true
+    },
+    "react-dom/client": {
+      "src": "../../node_modules/react-dom/client.js",
+      "file": "react-dom_client.js",
+      "fileHash": "9b83f69d",
+      "needsInterop": true
+    },
+    "framer-motion": {
+      "src": "../../node_modules/framer-motion/dist/es/index.mjs",
+      "file": "framer-motion.js",
+      "fileHash": "44a19ba3",
+      "needsInterop": false
+    },
+    "react-router-dom": {
+      "src": "../../node_modules/react-router-dom/dist/index.mjs",
+      "file": "react-router-dom.js",
+      "fileHash": "8d0ab5b8",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-WUIKHMXY": {
+      "file": "chunk-WUIKHMXY.js"
+    },
+    "chunk-LX74GOTH": {
+      "file": "chunk-LX74GOTH.js"
+    }
+  }
+}
