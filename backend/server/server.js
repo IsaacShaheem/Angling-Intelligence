@@ -3,6 +3,7 @@ import cors from "cors";
 import { geocodeLocation, getCurrentWeather } from "./lib/weather.js";
 import { getClosestWaters } from "./lib/geo.js";
 import { scoreAllSpecies } from "./lib/scoring.js";
+import { generateFishTip } from "./lib/ai.js";
 import { WATERS } from "./lib/waters.js";
 
 const app = express();
@@ -84,7 +85,16 @@ app.get("/api/water/:id", async (req, res) => {
     }
 
     const weather = await getCurrentWeather(water.lat, water.lon);
-    const speciesScores = scoreAllSpecies(water, weather);
+    const speciesScores = scoreAllSpecies(water, weather).map((speciesResult) => {
+      return {
+        species: speciesResult.species,
+        score: speciesResult.score,
+        difficulty: speciesResult.difficulty,
+        reasons: speciesResult.reasons,
+        methods: speciesResult.methods,
+        shortExplanation: speciesResult.shortExplanation,
+      };
+    });
 
     return res.json({
       water: {
@@ -106,6 +116,52 @@ app.get("/api/water/:id", async (req, res) => {
 
     return res.status(500).json({
       error: "Something went wrong while getting this water.",
+      details: error.message,
+    });
+  }
+});
+
+app.post("/api/fish-tip", async (req, res) => {
+  try {
+    const { water, speciesResult, weather } = req.body;
+
+    if (!water || !speciesResult || !weather) {
+      return res.status(400).json({
+        error: "Please provide water, speciesResult, and weather.",
+        example: {
+          water: {
+            name: "Lake Ontario",
+          },
+          speciesResult: {
+            species: "Smallmouth Bass",
+            score: 78,
+            difficulty: "Beginner-friendly",
+            reasons: ["mild temperature", "good cloud cover"],
+          },
+          weather: {
+            description: "partly cloudy",
+            temperature: {
+              value: 18,
+            },
+          },
+        },
+      });
+    }
+
+    const aiTip = await generateFishTip({
+      water,
+      speciesResult,
+      weather,
+    });
+
+    return res.json({
+      aiTip,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      error: "Something went wrong while generating this fishing tip.",
       details: error.message,
     });
   }
