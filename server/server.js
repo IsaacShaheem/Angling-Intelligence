@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import { geocodeLocation, getCurrentWeather } from "./lib/weather.js";
 import { getClosestWaters } from "./lib/geo.js";
 import { scoreAllSpecies } from "./lib/scoring.js";
@@ -7,6 +8,7 @@ import { WATERS } from "./lib/waters.js";
 const app = express();
 const PORT = 3000;
 
+app.use(cors());
 app.use(express.json());
 
 app.post("/api/nearby-waters", async (req, res) => {
