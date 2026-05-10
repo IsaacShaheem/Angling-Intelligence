@@ -29,6 +29,7 @@ function ExpandableSpeciesCard({
   const difficulty = fish.difficulty || 'Medium'
   const explanation = fish.shortExplanation || `${fish.species} have ${difficulty.toLowerCase()} difficulty today.`
   const barScale = Math.max(0, Math.min(1, (fish.score || 0) / 100))
+  const hasGeneratedTip = Boolean(aiTip)
 
   useEffect(() => {
     if (!expanded) return undefined
@@ -165,11 +166,11 @@ function ExpandableSpeciesCard({
                   <button
                     type="button"
                     onClick={onGenerateTip}
-                    disabled={tipLoading}
+                    disabled={tipLoading || hasGeneratedTip}
                     className="mt-4 inline-flex items-center gap-2 rounded-full bg-cyan-100 px-4 py-2 text-sm font-black text-slate-950 transition-colors hover:bg-white disabled:cursor-not-allowed disabled:bg-white/18 disabled:text-white/50"
                   >
                     {tipLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Brain className="h-4 w-4" />}
-                    Generate Gemini Tip
+                    {hasGeneratedTip ? '✓ Gemini Tip Generated' : 'Generate Gemini Tip'}
                   </button>
 
                   {tipLoading ? (
