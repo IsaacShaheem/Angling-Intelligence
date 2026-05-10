@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420" role="img" aria-label="Fish image placeholder">
+  <defs>
+    <linearGradient id="water" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#0b3342"/>
+      <stop offset=".55" stop-color="#102030"/>
+      <stop offset="1" stop-color="#07131f"/>
+    </linearGradient>
+    <linearGradient id="fish" x1="0" x2="1">
+      <stop offset="0" stop-color="#bae6fd"/>
+      <stop offset=".6" stop-color="#5eead4"/>
+      <stop offset="1" stop-color="#164e63"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="420" fill="url(#water)"/>
+  <path d="M84 206 C190 144 338 148 470 194 C532 216 578 214 612 192 C586 240 540 264 468 264 C312 264 184 250 84 206 Z" fill="url(#fish)" opacity=".7"/>
+  <path d="M470 194 L612 132 C584 190 586 226 614 286 L474 242 Z" fill="#155e75" opacity=".7"/>
+  <circle cx="138" cy="196" r="8" fill="#06131b"/>
+  <path d="M0 310 C130 270 250 330 390 286 C500 252 578 274 640 246 L640 420 L0 420 Z" fill="#07131f" opacity=".55"/>
+</svg>

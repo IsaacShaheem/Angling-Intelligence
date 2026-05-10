@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420" role="img" aria-label="Walleye">
+  <defs>
+    <linearGradient id="water" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#123847"/>
+      <stop offset=".55" stop-color="#152a2e"/>
+      <stop offset="1" stop-color="#07131f"/>
+    </linearGradient>
+    <linearGradient id="fish" x1="0" x2="1">
+      <stop offset="0" stop-color="#eee1a5"/>
+      <stop offset=".55" stop-color="#a38d44"/>
+      <stop offset="1" stop-color="#344327"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="420" fill="url(#water)"/>
+  <circle cx="520" cy="88" r="58" fill="#fde68a" opacity=".13"/>
+  <path d="M92 210 C190 146 328 142 460 190 C526 214 574 214 612 190 C584 240 538 264 464 264 C310 264 190 250 92 210 Z" fill="url(#fish)"/>
+  <path d="M462 188 L606 126 C576 188 578 222 612 286 L464 244 Z" fill="#5c6234"/>
+  <circle cx="146" cy="198" r="11" fill="#f8fafc"/><circle cx="148" cy="199" r="5" fill="#06131b"/>
+  <path d="M208 180 L190 126 M276 174 L264 122 M346 184 L344 130 M416 204 L428 152" stroke="#4a3f22" stroke-width="7" opacity=".45"/>
+</svg>

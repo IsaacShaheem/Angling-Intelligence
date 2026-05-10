@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420" role="img" aria-label="Smallmouth Bass">
+  <defs>
+    <linearGradient id="water" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#0f3543"/>
+      <stop offset="0.55" stop-color="#123021"/>
+      <stop offset="1" stop-color="#07131f"/>
+    </linearGradient>
+    <linearGradient id="fish" x1="0" x2="1">
+      <stop offset="0" stop-color="#d7c58d"/>
+      <stop offset="0.52" stop-color="#8f8a55"/>
+      <stop offset="1" stop-color="#3b4f2f"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="420" fill="url(#water)"/>
+  <path d="M0 290 C110 255 210 318 340 280 C475 238 555 264 640 230 L640 420 L0 420 Z" fill="#0a1c29" opacity=".72"/>
+  <path d="M84 124 C190 88 306 100 432 154 C510 188 558 190 594 170 C562 216 522 236 450 240 C304 248 206 220 106 160 Z" fill="url(#fish)"/>
+  <path d="M450 156 L588 92 C560 152 560 196 594 254 L454 224 Z" fill="#64733d"/>
+  <circle cx="142" cy="139" r="9" fill="#06131b"/>
+  <path d="M168 174 C240 196 338 202 438 190" fill="none" stroke="#2f3d25" stroke-width="8" opacity=".7"/>
+  <path d="M210 118 L182 76 M286 126 L264 78 M365 148 L354 98" stroke="#493f25" stroke-width="7" opacity=".5"/>
+</svg>

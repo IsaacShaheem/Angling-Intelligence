@@ -94,6 +94,284 @@ button:disabled {
   animation: mistFloat 24s ease-in-out infinite alternate;
 }
 
+.bubble-field {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+  contain: layout paint style;
+  transform: translateZ(0);
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(186, 230, 253, 0.28), transparent 36%),
+    radial-gradient(ellipse at 18% 38%, rgba(20, 184, 166, 0.18), transparent 34%),
+    radial-gradient(ellipse at 86% 52%, rgba(14, 165, 233, 0.16), transparent 32%),
+    linear-gradient(180deg, rgba(14, 116, 144, 0.14), rgba(3, 7, 18, 0.44) 78%);
+}
+
+.bubble-field::before {
+  position: absolute;
+  inset: 0;
+  content: '';
+  opacity: 0.52;
+  background-image:
+    radial-gradient(circle, rgba(186, 230, 253, 0.38) 0 1px, transparent 1.5px),
+    radial-gradient(circle, rgba(94, 234, 212, 0.18) 0 1px, transparent 1.5px);
+  background-position: 0 0, 42px 72px;
+  background-size: 96px 148px, 132px 190px;
+  animation: microbubbleDrift 34s linear infinite;
+}
+
+.bubble-field::after {
+  position: absolute;
+  inset: -18% -10%;
+  content: '';
+  opacity: 0.2;
+  background:
+    repeating-linear-gradient(
+      105deg,
+      transparent 0 42px,
+      rgba(186, 230, 253, 0.18) 44px 47px,
+      transparent 50px 118px
+    );
+  animation: causticSweep 22s ease-in-out infinite alternate;
+}
+
+.underwater-light {
+  position: absolute;
+  top: -12vh;
+  width: 22vw;
+  height: 78vh;
+  opacity: 0.3;
+  transform-origin: top center;
+  background: linear-gradient(180deg, rgba(186, 230, 253, 0.52), transparent 74%);
+  animation: lightRaySway 18s ease-in-out infinite alternate;
+}
+
+.underwater-light-a {
+  left: 14%;
+  transform: rotate(14deg);
+}
+
+.underwater-light-b {
+  right: 18%;
+  width: 18vw;
+  opacity: 0.2;
+  animation-delay: -8s;
+  transform: rotate(-12deg);
+}
+
+.underwater-light-c {
+  left: 48%;
+  width: 14vw;
+  opacity: 0.17;
+  animation-delay: -14s;
+  transform: rotate(5deg);
+}
+
+.fish-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.fish-silhouette {
+  position: absolute;
+  top: var(--fish-top);
+  left: -18vw;
+  width: var(--fish-size);
+  height: calc(var(--fish-size) * 0.34);
+  opacity: var(--fish-opacity);
+  animation: fishSwim var(--fish-duration) linear var(--fish-delay) infinite;
+  will-change: transform, opacity;
+}
+
+.fish-school {
+  position: absolute;
+  top: var(--school-top);
+  left: -20vw;
+  width: 260px;
+  height: 90px;
+  opacity: var(--school-opacity);
+  animation: fishSwim var(--school-duration) linear var(--school-delay) infinite;
+  will-change: transform, opacity;
+}
+
+.fish-school.fish-left {
+  left: auto;
+  right: -20vw;
+  animation-name: fishSwimReverse;
+}
+
+.school-fish {
+  position: absolute;
+  left: var(--school-x);
+  top: var(--school-y);
+  width: var(--school-size);
+  height: calc(var(--school-size) * 0.34);
+  border-radius: 55% 45% 48% 52%;
+  background: linear-gradient(90deg, rgba(4, 18, 28, 0.72), rgba(8, 47, 73, 0.48));
+  transform: scale(var(--school-scale));
+}
+
+.school-fish::before {
+  position: absolute;
+  top: 18%;
+  right: -22%;
+  width: 36%;
+  height: 64%;
+  content: '';
+  clip-path: polygon(0 50%, 100% 0, 78% 50%, 100% 100%);
+  background: rgba(4, 18, 28, 0.58);
+}
+
+.fish-school.fish-left .school-fish {
+  transform: scaleX(-1) scale(var(--school-scale));
+}
+
+.fish-silhouette > span {
+  position: absolute;
+  inset: 0;
+  border-radius: 55% 45% 48% 52%;
+  background: linear-gradient(90deg, rgba(2, 8, 23, 0.86), rgba(8, 47, 73, 0.62));
+}
+
+.fish-silhouette > span::before,
+.fish-silhouette > span::after {
+  position: absolute;
+  content: '';
+}
+
+.fish-silhouette > span::before {
+  top: 18%;
+  right: -22%;
+  width: 36%;
+  height: 64%;
+  clip-path: polygon(0 50%, 100% 0, 78% 50%, 100% 100%);
+  background: rgba(2, 8, 23, 0.72);
+}
+
+.fish-silhouette > span::after {
+  top: -24%;
+  left: 42%;
+  width: 21%;
+  height: 42%;
+  border-radius: 100% 0 80% 0;
+  background: rgba(2, 8, 23, 0.46);
+  transform: rotate(18deg);
+}
+
+.fish-left {
+  left: auto;
+  right: -18vw;
+  animation-name: fishSwimReverse;
+}
+
+.fish-left > span {
+  transform: scaleX(-1);
+}
+
+.fish-front {
+  z-index: 4;
+}
+
+.fish-mid {
+  z-index: 3;
+}
+
+.fish-back {
+  z-index: 2;
+}
+
+.bubble {
+  position: absolute;
+  z-index: 2;
+  bottom: -12vh;
+  left: var(--bubble-left);
+  width: var(--bubble-size);
+  height: var(--bubble-size);
+  border-radius: 999px;
+  opacity: var(--bubble-opacity);
+  background:
+    radial-gradient(circle at 31% 27%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.24) 20%, transparent 27%),
+    radial-gradient(circle at 64% 70%, rgba(125, 211, 252, 0.34), transparent 32%),
+    radial-gradient(circle at 50% 50%, rgba(186, 230, 253, 0.26), rgba(125, 211, 252, 0.12) 61%, transparent 72%);
+  border: 1px solid rgba(186, 230, 253, 0.32);
+  animation: bubbleRise var(--bubble-duration) linear var(--bubble-delay) infinite;
+  will-change: transform, opacity;
+}
+
+.bubble-back {
+  border-color: rgba(186, 230, 253, 0.22);
+}
+
+.bubble-mid {
+  border-color: rgba(186, 230, 253, 0.38);
+}
+
+.bubble-front {
+  z-index: 4;
+  background:
+    radial-gradient(circle at 28% 24%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.24) 19%, transparent 27%),
+    radial-gradient(circle at 78% 76%, rgba(94, 234, 212, 0.22), transparent 34%),
+    radial-gradient(circle at 50% 50%, rgba(224, 242, 254, 0.2), rgba(125, 211, 252, 0.1) 62%, transparent 73%);
+  border-color: rgba(224, 242, 254, 0.48);
+}
+
+.weed-bed {
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 5;
+  height: 54vh;
+  pointer-events: none;
+}
+
+.weed-bed::before {
+  position: absolute;
+  inset: auto 0 0;
+  height: 20vh;
+  content: '';
+  background: linear-gradient(180deg, transparent, rgba(1, 10, 15, 0.64));
+}
+
+.underwater-weed {
+  position: absolute;
+  bottom: -4vh;
+  left: var(--weed-left);
+  width: var(--weed-width);
+  height: var(--weed-height);
+  opacity: var(--weed-opacity);
+  transform-origin: bottom center;
+  border-radius: 999px 999px 0 0;
+  background: linear-gradient(180deg, rgba(45, 212, 191, 0.3), rgba(6, 78, 59, 0.56) 55%, rgba(2, 44, 34, 0.78));
+  animation: weedSway var(--weed-duration) ease-in-out var(--weed-delay) infinite alternate;
+  will-change: transform;
+}
+
+.underwater-weed::before,
+.underwater-weed::after {
+  position: absolute;
+  bottom: 0;
+  width: 72%;
+  height: 82%;
+  content: '';
+  border-radius: 999px 999px 0 0;
+  background: inherit;
+  opacity: 0.72;
+  transform-origin: bottom center;
+}
+
+.underwater-weed::before {
+  left: -64%;
+  transform: rotate(-13deg);
+}
+
+.underwater-weed::after {
+  right: -58%;
+  height: 70%;
+  transform: rotate(16deg);
+}
+
 @keyframes waterDrift {
   from {
     transform: translate3d(-1.5%, 0, 0);
@@ -101,6 +379,159 @@ button:disabled {
 
   to {
     transform: translate3d(1%, 6px, 0);
+  }
+}
+
+@keyframes fishSwim {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0;
+  }
+
+  10% {
+    opacity: var(--fish-opacity);
+  }
+
+  50% {
+    transform: translate3d(58vw, 14px, 0);
+  }
+
+  90% {
+    opacity: var(--fish-opacity);
+  }
+
+  100% {
+    transform: translate3d(126vw, -8px, 0);
+    opacity: 0;
+  }
+}
+
+@keyframes fishSwimReverse {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0;
+  }
+
+  10% {
+    opacity: var(--fish-opacity);
+  }
+
+  50% {
+    transform: translate3d(-58vw, -12px, 0);
+  }
+
+  90% {
+    opacity: var(--fish-opacity);
+  }
+
+  100% {
+    transform: translate3d(-126vw, 10px, 0);
+    opacity: 0;
+  }
+}
+
+@keyframes fishPulse {
+  from {
+    transform: scaleY(0.92);
+  }
+
+  to {
+    transform: scaleY(1.05);
+  }
+}
+
+@keyframes fishPulseLeft {
+  from {
+    transform: scaleX(-1) scaleY(0.92);
+  }
+
+  to {
+    transform: scaleX(-1) scaleY(1.05);
+  }
+}
+
+@keyframes schoolFishPulse {
+  from {
+    transform: scale(var(--school-scale)) scaleY(0.92);
+  }
+
+  to {
+    transform: scale(var(--school-scale)) scaleY(1.05);
+  }
+}
+
+@keyframes fishPulseLeftSchool {
+  from {
+    transform: scaleX(-1) scale(var(--school-scale)) scaleY(0.92);
+  }
+
+  to {
+    transform: scaleX(-1) scale(var(--school-scale)) scaleY(1.05);
+  }
+}
+
+@keyframes bubbleRise {
+  0% {
+    transform: translate3d(0, 0, 0) scale(0.72);
+    opacity: 0;
+  }
+
+  9% {
+    opacity: var(--bubble-opacity);
+  }
+
+  45% {
+    transform: translate3d(var(--bubble-drift), -52vh, 0) scale(1.03);
+  }
+
+  72% {
+    transform: translate3d(var(--bubble-drift-soft), -84vh, 0) scale(0.94);
+    opacity: var(--bubble-opacity);
+  }
+
+  100% {
+    transform: translate3d(var(--bubble-drift-end), -122vh, 0) scale(1.12);
+    opacity: 0;
+  }
+}
+
+@keyframes weedSway {
+  from {
+    transform: rotate(-8deg) skewX(-3deg);
+  }
+
+  to {
+    transform: rotate(9deg) skewX(3deg);
+  }
+}
+
+@keyframes microbubbleDrift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(28px, -180px, 0);
+  }
+}
+
+@keyframes lightRaySway {
+  from {
+    transform: translate3d(-2%, 0, 0) rotate(12deg);
+  }
+
+  to {
+    transform: translate3d(4%, 0, 0) rotate(17deg);
+  }
+}
+
+@keyframes causticSweep {
+  from {
+    transform: translate3d(-3%, -2%, 0) rotate(-2deg);
+  }
+
+  to {
+    transform: translate3d(4%, 3%, 0) rotate(2deg);
   }
 }
 
@@ -116,7 +547,38 @@ button:disabled {
 
 @media (max-width: 640px), (prefers-reduced-motion: reduce) {
   .water-sheen,
-  .mist-layer {
+  .mist-layer,
+  .bubble,
+  .bubble-field::before,
+  .bubble-field::after,
+  .underwater-light,
+  .fish-silhouette,
+  .fish-silhouette > span,
+  .fish-school,
+  .school-fish,
+  .underwater-weed {
     animation: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .bubble-back:nth-of-type(odd),
+  .bubble-mid:nth-of-type(3n) {
+    display: none;
+  }
+
+  .bubble-field::before {
+    opacity: 0.2;
+  }
+
+  .fish-back,
+  .fish-school:nth-child(odd),
+  .fish-mid:nth-of-type(even),
+  .underwater-weed:nth-child(odd) {
+    display: none;
+  }
+
+  .weed-bed {
+    height: 34vh;
   }
 }

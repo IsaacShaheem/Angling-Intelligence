@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420" role="img" aria-label="Largemouth Bass">
+  <defs>
+    <linearGradient id="water" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#0e3a48"/>
+      <stop offset=".56" stop-color="#122d2a"/>
+      <stop offset="1" stop-color="#07131f"/>
+    </linearGradient>
+    <linearGradient id="fish" x1="0" x2="1">
+      <stop offset="0" stop-color="#d9d59a"/>
+      <stop offset=".52" stop-color="#7b8b47"/>
+      <stop offset="1" stop-color="#28452d"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="420" fill="url(#water)"/>
+  <path d="M0 102 C160 136 270 86 640 124 L640 0 L0 0 Z" fill="#a7f3d0" opacity=".08"/>
+  <path d="M68 198 C178 128 334 128 476 184 C536 208 584 204 620 182 C594 236 546 260 474 258 C314 256 178 244 68 198 Z" fill="url(#fish)"/>
+  <path d="M476 184 L620 118 C588 178 590 218 620 284 L480 230 Z" fill="#4f6534"/>
+  <circle cx="126" cy="188" r="8" fill="#06131b"/>
+  <path d="M138 210 C196 186 226 190 280 202 C350 218 408 210 478 192" fill="none" stroke="#1d331f" stroke-width="9" opacity=".72"/>
+</svg>

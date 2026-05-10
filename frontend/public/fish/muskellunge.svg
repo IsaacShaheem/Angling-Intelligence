@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420" role="img" aria-label="Muskellunge">
+  <defs>
+    <linearGradient id="water" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#073443"/>
+      <stop offset=".55" stop-color="#102b32"/>
+      <stop offset="1" stop-color="#07131f"/>
+    </linearGradient>
+    <linearGradient id="fish" x1="0" x2="1">
+      <stop offset="0" stop-color="#cbd5a0"/>
+      <stop offset=".5" stop-color="#687d4a"/>
+      <stop offset="1" stop-color="#243b2d"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="420" fill="url(#water)"/>
+  <path d="M0 320 C100 284 230 328 352 290 C494 246 560 272 640 246 L640 420 L0 420 Z" fill="#07131f" opacity=".66"/>
+  <path d="M54 198 C174 126 350 132 502 184 C558 204 598 204 628 184 C598 232 554 254 494 258 C320 262 168 246 54 198 Z" fill="url(#fish)"/>
+  <path d="M502 184 L628 112 C604 170 604 218 628 286 L506 230 Z" fill="#3f5a36"/>
+  <circle cx="108" cy="188" r="8" fill="#06131b"/>
+  <path d="M168 176 C252 204 390 210 492 196" fill="none" stroke="#223520" stroke-width="6" opacity=".65"/>
+  <path d="M178 152 C238 132 284 164 340 140 C406 114 454 152 498 134" fill="none" stroke="#e2e8a7" stroke-width="7" opacity=".36"/>
+</svg>

@@ -1,6 +1,8 @@
 import { Accessibility, ChevronDown, Fish, Gauge, Loader2, MapPin, Waves } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { memo, useCallback } from 'react'
+import { fishImages } from '../data/fishImages'
+import FishCard from './FishCard.jsx'
 import FishSpeciesCard from './FishSpeciesCard.jsx'
 
 function titleCase(value) {
@@ -90,27 +92,54 @@ function WaterCard({ water, expanded, details, isLoading, onToggle }) {
                   Loading fishing opportunities
                 </div>
               ) : (
-                <motion.div
-                  className="grid gap-3"
-                  initial="hidden"
-                  animate="show"
-                  variants={{
-                    hidden: { opacity: 0 },
-                    show: { opacity: 1, transition: { staggerChildren: 0.035 } },
-                  }}
-                >
-                  {species.map((fish) => (
+                <>
+                  <section className="mt-7">
+                    <div className="mb-4 flex items-end justify-between gap-4">
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-[0.22em] text-cyan-100/55">
+                          Species directory
+                        </p>
+                        <h5 className="mt-2 text-2xl font-black text-white">Fish Species Found Here</h5>
+                      </div>
+                      <span className="hidden rounded-full bg-white/[0.07] px-3 py-1.5 text-xs font-bold text-white/55 sm:inline-flex">
+                        {species.length} species
+                      </span>
+                    </div>
+
                     <motion.div
-                      key={fish.species}
+                      className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+                      initial="hidden"
+                      animate="show"
                       variants={{
-                        hidden: { opacity: 0, y: 10 },
-                        show: { opacity: 1, y: 0, transition: { duration: 0.18, ease: 'easeOut' } },
+                        hidden: { opacity: 0 },
+                        show: { opacity: 1, transition: { staggerChildren: 0.035 } },
                       }}
                     >
-                      <FishSpeciesCard fish={fish} />
+                      {species.map((fish) => (
+                        <motion.div
+                          key={fish.species}
+                          variants={{
+                            hidden: { opacity: 0, y: 10 },
+                            show: { opacity: 1, y: 0, transition: { duration: 0.18, ease: 'easeOut' } },
+                          }}
+                        >
+                          <FishCard name={fish.species} image={fishImages[fish.species]} />
+                        </motion.div>
+                      ))}
                     </motion.div>
-                  ))}
-                </motion.div>
+                  </section>
+
+                  <section className="mt-7">
+                    <p className="mb-4 text-xs font-bold uppercase tracking-[0.22em] text-emerald-100/55">
+                      Today&apos;s opportunity notes
+                    </p>
+                    <div className="grid gap-3">
+                      {species.map((fish) => (
+                        <FishSpeciesCard key={fish.species} fish={fish} />
+                      ))}
+                    </div>
+                  </section>
+                </>
               )}
             </div>
           </motion.div>

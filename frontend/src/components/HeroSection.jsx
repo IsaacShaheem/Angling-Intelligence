@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { memo } from 'react'
+import BubbleBackground from './BubbleBackground.jsx'
 import SearchBar from './SearchBar.jsx'
 
 const fadeUp = {
@@ -14,15 +15,16 @@ function HeroSection({ onSearch, isLoading }) {
       className="relative flex min-h-screen items-center overflow-hidden bg-midnight px-5 py-28 sm:px-8"
     >
       <div
-        className="absolute inset-0 scale-105 bg-cover bg-center opacity-70"
+        className="absolute inset-0 scale-105 bg-cover bg-center opacity-42"
         style={{
           backgroundImage:
             "url('https://images.unsplash.com/photo-1755870344289-00ac1db1b144?auto=format&fit=crop&fm=webp&q=58&w=1600')",
         }}
       />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(125,211,252,0.12),transparent_25%),radial-gradient(circle_at_50%_78%,rgba(16,185,129,0.11),transparent_34%),linear-gradient(180deg,rgba(3,12,21,0.42),rgba(8,19,31,0.84)_64%,#08131f_92%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_18%,rgba(186,230,253,0.20),transparent_22%),radial-gradient(circle_at_50%_55%,rgba(20,184,166,0.14),transparent_38%),linear-gradient(180deg,rgba(8,47,73,0.68)_0%,rgba(8,28,43,0.88)_44%,#020814_100%)]" />
       <div className="water-sheen absolute inset-x-0 bottom-0 h-[36vh] opacity-45" />
       <div className="mist-layer absolute inset-x-0 top-20 h-44 opacity-45" />
+      <BubbleBackground />
       <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-b from-transparent to-midnight" />
 
       <motion.div
