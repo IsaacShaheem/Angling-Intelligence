@@ -591,6 +591,7 @@ Potential future improvements:
 Built by:
 
 ```txt
+Arya Rahimian
 Isaac Shaheem
 ```
 
