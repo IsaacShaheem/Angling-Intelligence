@@ -98,7 +98,7 @@ function normalizeWaterSummary(water = {}) {
 }
 
 function normalizeSpeciesScore(fish = {}) {
-  const reasons = Array.isArray(fish.reasons) ? fish.reasons.map((reason) => cleanReason(reason)) : []
+  const reasons = Array.isArray(fish.reasons) ? fish.reasons.map((reason) => normalizeReason(reason)) : []
   const methods = Array.isArray(fish.methods) ? fish.methods : []
   const species = fish.species || 'This species'
   const score = typeof fish.score === 'number' ? fish.score : 0
@@ -113,7 +113,7 @@ function normalizeSpeciesScore(fish = {}) {
     methods,
     shortExplanation:
       removeScoreText(fish.shortExplanation) ||
-      `${species} have ${difficulty.toLowerCase()} difficulty today. ${reasons[0] || 'Use current conditions and local structure to choose your presentation.'}`,
+      `${species} have ${difficulty.toLowerCase()} difficulty today. ${reasons[0]?.text || 'Use current conditions and local structure to choose your presentation.'}`,
     aiTip: removeScoreText(fish.aiTip) || '',
   }
 }
@@ -130,6 +130,23 @@ function normalizeDifficultyLabel(value, score) {
 
 function cleanReason(reason) {
   return String(reason || '').replace(/^[+-]?\d+:\s*/, '')
+}
+
+function normalizeReason(reason) {
+  const originalText = String(reason || '').trim()
+  const sentiment = getReasonSentiment(originalText)
+
+  return {
+    text: cleanReason(originalText),
+    sentiment,
+  }
+}
+
+function getReasonSentiment(reason) {
+  if (reason.startsWith('+')) return 'positive'
+  if (reason.startsWith('-')) return 'negative'
+
+  return 'neutral'
 }
 
 function removeScoreText(text) {

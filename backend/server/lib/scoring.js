@@ -1,21 +1,21 @@
 import { SPECIES_PROFILES } from "./waters.js";
 
 const BASE_SPECIES_SCORES = {
-  Panfish: 75,
+  Panfish: 80,
   "Common Carp": 65,
   "Largemouth Bass": 60,
   "Smallmouth Bass": 60,
-  "Northern Pike": 55,
+  "Northern Pike": 60,
   "Channel Catfish": 55,
-  Walleye: 50,
-  "Rainbow Trout": 45,
-  "Brown Trout": 45,
+  Walleye: 48,
+  "Rainbow Trout": 42,
+  "Brown Trout": 42,
   "Brook Trout": 40,
-  "Lake Trout": 40,
+  "Lake Trout": 38,
   "Chinook Salmon": 35,
   "Coho Salmon": 35,
   "Longnose Gar": 30,
-  Muskellunge: 25,
+  Muskellunge: 22,
   "Atlantic Salmon": 20,
 };
 
@@ -56,7 +56,8 @@ export function scoreSpecies(species, weather, water) {
     getTemperatureModifier(species, temperature),
     getTimeModifier(species, timeOfDay, temperature),
     getWaterSuitabilityModifier(species, habitats),
-    getPressureModifier(water),
+    getPressureModifier(species, water),
+    getWeatherModifier(species, weather),
   ];
 
   const totalModifier = modifiers.reduce((total, modifier) => {
@@ -156,7 +157,11 @@ function getMonthModifier(species, month) {
   }
 
   if (species === "Panfish") {
-    return makeModifier(2, "Panfish opportunities are fairly stable year-round.");
+    if (month === 12 || month <= 2) {
+      return makeModifier(1, "Panfish remain available through winter when conditions are fishable.");
+    }
+
+    return makeModifier(4, "Panfish opportunities are fairly stable year-round.");
   }
 
   if (species === "Common Carp" || species === "Channel Catfish") {
@@ -196,8 +201,12 @@ function getTemperatureModifier(species, temperature) {
       return makeModifier(8, "Cool temperatures usually help trout.");
     }
 
+    if (temperature >= 20 && temperature < 24) {
+      return makeModifier(-8, "Warm temperatures can push trout into tougher patterns.");
+    }
+
     if (temperature >= 24) {
-      return makeModifier(-12, "Hot temperatures can make trout much tougher.");
+      return makeModifier(-16, "Hot temperatures can make trout much tougher.");
     }
   }
 
@@ -206,8 +215,12 @@ function getTemperatureModifier(species, temperature) {
       return makeModifier(6, "Cooler conditions often help salmonids.");
     }
 
+    if (temperature >= 20 && temperature < 24) {
+      return makeModifier(-6, "Warm conditions can make salmonid opportunities less reliable.");
+    }
+
     if (temperature >= 24) {
-      return makeModifier(-8, "Hot weather can reduce salmonid activity.");
+      return makeModifier(-12, "Hot weather can reduce salmonid activity.");
     }
   }
 
@@ -216,8 +229,32 @@ function getTemperatureModifier(species, temperature) {
       return makeModifier(6, "Moderate temperatures often help pike.");
     }
 
+    if (temperature > 20 && temperature < 28) {
+      return makeModifier(-3, "Warmer water can push pike into slower or deeper patterns.");
+    }
+
     if (temperature >= 28) {
-      return makeModifier(-5, "Extreme heat can make pike less active.");
+      return makeModifier(-9, "Extreme heat can make pike less active.");
+    }
+  }
+
+  if (species === "Walleye") {
+    if (temperature >= 6 && temperature <= 18) {
+      return makeModifier(4, "Cool to moderate temperatures can help walleye.");
+    }
+
+    if (temperature >= 24) {
+      return makeModifier(-8, "Hot temperatures can make walleye harder to pattern.");
+    }
+  }
+
+  if (species === "Muskellunge") {
+    if (temperature >= 10 && temperature <= 22) {
+      return makeModifier(3, "Moderate temperatures can slightly help muskie opportunities.");
+    }
+
+    if (temperature < 5 || temperature >= 27) {
+      return makeModifier(-7, "Very cold or hot temperatures make muskie opportunities tougher.");
     }
   }
 
@@ -231,7 +268,17 @@ function getTemperatureModifier(species, temperature) {
     }
   }
 
-  if (species === "Common Carp" || species === "Panfish" || species === "Longnose Gar") {
+  if (species === "Panfish") {
+    if (temperature >= 8 && temperature <= 28) {
+      return makeModifier(4, "Panfish handle a wide range of fishable temperatures.");
+    }
+
+    if (temperature < 3 || temperature > 31) {
+      return makeModifier(-6, "Extreme temperatures can reduce panfish activity.");
+    }
+  }
+
+  if (species === "Common Carp" || species === "Longnose Gar") {
     if (temperature >= 16 && temperature <= 28) {
       return makeModifier(5, "Warm temperatures are generally helpful.");
     }
@@ -305,7 +352,13 @@ function getWaterSuitabilityModifier(species, habitats) {
     }
   }
 
-  if (species === "Common Carp" || species === "Panfish") {
+  if (species === "Panfish") {
+    if (habitats.includes("urban_harbour") || habitats.includes("shallow_weedy")) {
+      return makeModifier(7, "Harbour or shallow habitat often suits panfish.");
+    }
+  }
+
+  if (species === "Common Carp") {
     if (habitats.includes("urban_harbour") || habitats.includes("shallow_weedy")) {
       return makeModifier(6, "Harbour or shallow habitat often suits this species.");
     }
@@ -326,18 +379,73 @@ function getWaterSuitabilityModifier(species, habitats) {
   return makeModifier(0, "Water type is neutral for this species.");
 }
 
-function getPressureModifier(water) {
+function getPressureModifier(species, water) {
   const pressureLevel = normalizePressure(water && water.pressureLevel);
 
   if (pressureLevel === "low") {
+    if (species === "Panfish") {
+      return makeModifier(4, "Lower fishing pressure gives panfish a small opportunity boost.");
+    }
+
     return makeModifier(5, "Lower fishing pressure gives a small opportunity boost.");
   }
 
   if (pressureLevel === "high") {
-    return makeModifier(-6, "High fishing pressure slightly reduces opportunity.");
+    if (species === "Panfish") {
+      return makeModifier(-2, "High fishing pressure only slightly reduces panfish opportunity.");
+    }
+
+    if (species === "Northern Pike") {
+      return makeModifier(-8, "High fishing pressure makes pike less predictable.");
+    }
+
+    if (species === "Walleye" || isTrout(species) || isSalmon(species)) {
+      return makeModifier(-10, "High fishing pressure makes this species harder to pattern.");
+    }
+
+    if (species === "Muskellunge") {
+      return makeModifier(-12, "High fishing pressure makes muskie opportunities much tougher.");
+    }
+
+    return makeModifier(-7, "High fishing pressure reduces opportunity.");
   }
 
   return makeModifier(0, "Medium fishing pressure is neutral.");
+}
+
+function getWeatherModifier(species, weather) {
+  const description = ((weather && weather.description) || "").toLowerCase();
+  const cloudCover = getCloudCover(weather);
+  const isBright =
+    description.includes("clear") ||
+    description.includes("sunny") ||
+    (cloudCover !== null && cloudCover <= 25);
+
+  if (!isBright) {
+    return makeModifier(0, "Weather brightness is neutral.");
+  }
+
+  if (species === "Panfish") {
+    return makeModifier(0, "Bright conditions are usually manageable for panfish.");
+  }
+
+  if (species === "Northern Pike") {
+    return makeModifier(-6, "Very clear or bright conditions can make pike less aggressive.");
+  }
+
+  if (species === "Walleye") {
+    return makeModifier(-7, "Bright conditions can make walleye harder to target.");
+  }
+
+  if (isTrout(species) || isSalmon(species)) {
+    return makeModifier(-4, "Bright conditions can make salmonids more cautious.");
+  }
+
+  if (species === "Muskellunge") {
+    return makeModifier(-5, "Bright conditions can make muskie follows harder to convert.");
+  }
+
+  return makeModifier(0, "Weather brightness is neutral.");
 }
 
 function getWaterHabitats(water) {
@@ -445,6 +553,18 @@ function getTemperature(weather) {
     typeof weather.temperature.value === "number"
   ) {
     return weather.temperature.value;
+  }
+
+  return null;
+}
+
+function getCloudCover(weather) {
+  if (
+    weather &&
+    weather.cloudCover &&
+    typeof weather.cloudCover.value === "number"
+  ) {
+    return weather.cloudCover.value;
   }
 
   return null;

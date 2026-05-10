@@ -185,9 +185,12 @@ function BestTargetCard({ fish, loading }) {
         ) : fish ? (
           <>
             <h2 className="mt-3 text-3xl font-black text-white">{fish.species}</h2>
-            <p className="mt-3 text-lg font-bold text-emerald-100">
-              {fish.difficulty || 'Medium'} Difficulty
-            </p>
+            <div className="mt-3">
+              <p className="text-4xl font-black leading-none text-emerald-100">{fish.score}</p>
+              <p className="mt-1 text-sm font-black uppercase tracking-[0.16em] text-white/58">
+                {fish.difficulty || 'Medium'} Difficulty
+              </p>
+            </div>
             <p className="mt-3 text-sm leading-6 text-white/62">
               {fish.shortExplanation || "Today's strongest target based on the current conditions."}
             </p>

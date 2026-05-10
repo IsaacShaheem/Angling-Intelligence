@@ -1,13 +1,13 @@
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { Brain, ChevronDown, CircleDot, CloudSun, Leaf, Loader2, Thermometer, Timer, X } from 'lucide-react'
+import { Brain, ChevronDown, CloudSun, Leaf, Loader2, Thermometer, Timer, X } from 'lucide-react'
 import { memo, useEffect, useState } from 'react'
 import { fallbackFishImage, fallbackFishImageBackup, fishImages } from '../data/fishImages'
 
-function difficultyGradient(difficulty) {
-  if (difficulty === 'Easy') return 'from-emerald-400 to-green-300'
-  if (difficulty === 'Medium') return 'from-yellow-300 to-amber-200'
-  if (difficulty === 'Hard') return 'from-orange-400 to-amber-300'
-  return 'from-red-500 to-rose-400'
+function scoreGradient(score) {
+  if (score <= 25) return 'from-red-500 to-rose-400'
+  if (score <= 50) return 'from-orange-400 to-amber-300'
+  if (score <= 70) return 'from-yellow-300 to-amber-200'
+  return 'from-emerald-400 to-green-300'
 }
 
 function ExpandableSpeciesCard({
@@ -28,7 +28,8 @@ function ExpandableSpeciesCard({
   const reasons = Array.isArray(fish.reasons) ? fish.reasons : []
   const difficulty = fish.difficulty || 'Medium'
   const explanation = fish.shortExplanation || `${fish.species} have ${difficulty.toLowerCase()} difficulty today.`
-  const barScale = Math.max(0, Math.min(1, (fish.score || 0) / 100))
+  const score = Math.max(0, Math.min(100, fish.score || 0))
+  const barScale = score / 100
   const hasGeneratedTip = Boolean(aiTip)
   const tipButtonClassName = hasGeneratedTip
     ? 'mt-4 inline-flex items-center gap-2 rounded-full border border-emerald-100/25 bg-emerald-100/14 px-4 py-2 text-sm font-black text-emerald-50 transition-colors disabled:cursor-not-allowed'
@@ -105,20 +106,25 @@ function ExpandableSpeciesCard({
               <p className="mt-2 text-sm font-bold text-cyan-100/70">{difficulty} Difficulty</p>
             </div>
             <div className="shrink-0 text-right">
-              <p className={`${expanded ? 'text-3xl sm:text-4xl' : 'text-2xl'} font-black leading-none text-white`}>
-                {difficulty}
+              <p className={`${expanded ? 'text-6xl' : 'text-4xl'} font-black leading-none text-white`}>
+                {score}
               </p>
-              <p className="mt-1 text-xs font-black uppercase tracking-[0.16em] text-white/42">difficulty</p>
+              <p className="mt-1 text-xs font-black uppercase tracking-[0.16em] text-white/58">
+                {difficulty} difficulty
+              </p>
             </div>
           </div>
         </div>
 
         <div className="flex items-center justify-between gap-4 px-4 py-4 sm:px-5">
-          <div className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-white/10">
-            <div
-              className={`h-full origin-left rounded-full bg-gradient-to-r ${difficultyGradient(difficulty)}`}
-              style={{ transform: `scaleX(${barScale})` }}
-            />
+          <div className="min-w-0 flex-1">
+            <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+              <div
+                className={`h-full origin-left rounded-full bg-gradient-to-r ${scoreGradient(score)}`}
+                style={{ transform: `scaleX(${barScale})` }}
+              />
+            </div>
+            <p className="mt-2 text-xs font-semibold text-white/38">Higher score = easier fishing opportunity</p>
           </div>
           <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/[0.08] text-white/72">
             {expanded ? <X className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -148,12 +154,22 @@ function ExpandableSpeciesCard({
                 </div>
                 {reasons.length > 0 ? (
                   <div className="mt-4 grid gap-2">
-                    {reasons.map((reason, index) => (
-                      <p key={`${reason}-${index}`} className="flex gap-2 text-sm leading-6 text-white/66">
-                        <CircleDot className="mt-1.5 h-3 w-3 shrink-0 text-emerald-100/72" />
-                        {reason}
-                      </p>
-                    ))}
+                    {reasons.map((reason, index) => {
+                      const reasonText = typeof reason === 'string' ? reason : reason.text
+                      const sentiment = typeof reason === 'object' ? reason?.sentiment : 'neutral'
+                      const dotColor = {
+                        positive: 'bg-emerald-400',
+                        negative: 'bg-rose-400',
+                        neutral: 'bg-white/28',
+                      }[sentiment] || 'bg-white/28'
+
+                      return (
+                        <p key={`${reasonText}-${index}`} className="flex gap-2 text-sm leading-6 text-white/66">
+                          <span className={`mt-2 h-2.5 w-2.5 shrink-0 rounded-full ${dotColor}`} />
+                          {reasonText}
+                        </p>
+                      )
+                    })}
                   </div>
                 ) : null}
               </section>
